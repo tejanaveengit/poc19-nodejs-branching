@@ -32,7 +32,7 @@ jobs:
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          echo "Connected to EC2 ✅"
+          echo "Connected to EC2 Instance ✅"
           sudo apt update -y
           sudo apt install nodejs npm git -y
           rm -rf app
