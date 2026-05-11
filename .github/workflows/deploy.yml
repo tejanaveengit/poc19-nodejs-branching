@@ -25,21 +25,18 @@ jobs:
     - name: Run tests
       run: npm test
 
-    - name: Deploy to EC2   # ✅ FIXED INDENTATION
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        key_format: pem     # ✅ ADD THIS LINE
-        port: 22
-        script: |
-          echo "Connected to EC2 Instance ✅"
+    - name: Deploy to EC2   # ✅ Correct alignment
+      run: |
+        echo "${{ secrets.EC2_SSH_KEY_BASE64 }}" | base64 -d > private_key.pem
+        chmod 600 private_key.pem
+
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          echo "✅ Connected to EC2"
+
           sudo apt update -y
-          sudo apt install nodejs npm git -y
-          rm -rf app
-          git clone https://github.com/tejanaveengit/poc19-nodejs-branching.git app
-          cd app
-          npm install
-          pkill node || true
-          nohup npm start > app.log 2>&1 &
+          sudo apt install -y nodejs npm git
+
+          if [ -d "app" ]; then
+            cd app
+            git pull
+          else
