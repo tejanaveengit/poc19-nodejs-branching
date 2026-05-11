@@ -6,7 +6,7 @@ const server = http.createServer((req, res) => {
   res.setHeader("Content-Type", "text/plain");
 
   if (req.url === "/") {
-    res.end("Welcome to CI/CD Demo 🚀");
+    res.end("Welcome to CI/CD NodeJS Demo 🚀");
   } else if (req.url === "/health") {
     res.end("Application is healthy ✅");
   } else if (req.url === "/about") {
