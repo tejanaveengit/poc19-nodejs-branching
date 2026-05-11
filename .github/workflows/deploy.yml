@@ -31,6 +31,8 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
+        key_format: pem     # ✅ ADD THIS LINE
+        port: 22
         script: |
           echo "Connected to EC2 Instance ✅"
           sudo apt update -y
