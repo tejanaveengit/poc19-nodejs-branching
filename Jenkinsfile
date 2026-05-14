@@ -5,13 +5,17 @@ pipeline {
         EC2_USER = "ubuntu"
         EC2_HOST = "13.200.252.23"
         APP_DIR = "/home/ubuntu/app"
+        REPO_URL = "https://github.com/tejanaveengit/poc19-nodejs-branching.git"
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/tejanaveengit/poc19-nodejs-branching.git'
+                script {
+                    // Use the branch that triggered the pipeline
+                    git branch: "${env.BRANCH_NAME}", url: "${REPO_URL}"
+                }
             }
         }
 
@@ -33,18 +37,41 @@ pipeline {
             }
         }
 
-        stage('Deploy to EC2') {
+        stage('Deploy to Staging') {
+            when {
+                branch 'develop'
+            }
             steps {
-                sh '''
-                ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << EOF
-                    rm -rf $APP_DIR
-                    git clone <YOUR-GIT-REPO-URL> $APP_DIR
-                    cd $APP_DIR
+                sh """
+                ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
+                    echo "Deploying to STAGING..."
+                    rm -rf ${APP_DIR}
+                    git clone -b develop ${REPO_URL} ${APP_DIR}
+                    cd ${APP_DIR}
                     npm install
                     pkill node || true
                     nohup npm start > app.log 2>&1 &
                 EOF
-                '''
+                """
+            }
+        }
+
+        stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh """
+                ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
+                    echo "Deploying to PRODUCTION..."
+                    rm -rf ${APP_DIR}
+                    git clone -b main ${REPO_URL} ${APP_DIR}
+                    cd ${APP_DIR}
+                    npm install
+                    pkill node || true
+                    nohup npm start > app.log 2>&1 &
+                EOF
+                """
             }
         }
     }
