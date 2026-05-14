@@ -1,0 +1,23 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker build -t sample-app:staging .
+
+      - name: Deploy to Staging Server
+        run: |
+          echo "Deploying to staging..."
+          # Example: SSH / kubectl / AWS deploy command
